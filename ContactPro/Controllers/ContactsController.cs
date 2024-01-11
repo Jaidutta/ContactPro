@@ -20,22 +20,41 @@ namespace ContactPro.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<AppUser> _userManager;
         private readonly IImageService _imageService;
+        private readonly IAddressBookService _addressBookService;
 
         public ContactsController(ApplicationDbContext context, 
                                     UserManager<AppUser> userManager,
-                                    IImageService imageService)
+                                    IImageService imageService, 
+                                    IAddressBookService addressBookService)
         {
             _context = context;
             _userManager = userManager;
             _imageService = imageService;
+            _addressBookService = addressBookService;
         }
 
         // GET: Contacts
         [Authorize]
         public async Task<IActionResult> Index()
-        {
-            var applicationDbContext = _context.Contacts.Include(c => c.AppUser);
-            return View(await applicationDbContext.ToListAsync());
+        {   
+            var contacts = new List<Contact>();
+            string appUserId = _userManager.GetUserId(User);
+
+            // return the userId and its associated contacts and categories
+            AppUser? appUser = _context.Users
+                .Include(c => c.Contacts)
+                .ThenInclude(c => c.Categories)
+                .FirstOrDefault(u => u.Id == appUserId);
+
+            var categories = appUser.Categories;
+
+            contacts = appUser.Contacts.OrderBy(c => c.LastName)
+                                        .ThenBy(c => c.FirstName)
+                                        .ToList();
+            ViewData["CategoryId"] = new SelectList(categories, "Id", "Name");
+
+            return View(contacts);
+
         }
 
         // GET: Contacts/Details/5
@@ -60,9 +79,10 @@ namespace ContactPro.Controllers
 
         // GET: Contacts/Create
         [Authorize]
-        public IActionResult Create()
+        public async Task <IActionResult> Create()
         {
-            ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id");
+            string appUserId = _userManager.GetUserId(User);
+            ViewData["CategoryList"] = new MultiSelectList(await _addressBookService.GetUserCategoriesAsync(appUserId), "Id", "Name");
             ViewData["StatesList"] = new SelectList(Enum.GetValues(typeof(States)).Cast<States>().ToList());
             return View();
         }
@@ -72,7 +92,7 @@ namespace ContactPro.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,BirthDate,Address1,Address2,City,State,ZipCode,Email,PhoneNumber,ImageFile")] Contact contact)
+        public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,BirthDate,Address1,Address2,City,State,ZipCode,Email,PhoneNumber,ImageFile")] Contact contact, List<int> CategoryList)
         {
             ModelState.Remove("AppUserId");
 
@@ -96,6 +116,10 @@ namespace ContactPro.Controllers
                 await _context.SaveChangesAsync();
 
                 // loop over all the selected categories
+                foreach(int categoryId in CategoryList)
+                {
+                    await _addressBookService.AddContactToCategoryAsync(categoryId, contact.Id);
+                }
                 // save each category selected to the ContactCategories table
 
                 return RedirectToAction(nameof(Index));
