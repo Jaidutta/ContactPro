@@ -19,3 +19,5 @@ namespace ContactPro.Models
         public virtual ICollection<Contact> Contacts { get; set; } = new HashSet<Contact>();
     }
 }
+
+// Refer to https://www.entityframeworktutorial.net/entityframework6/entity-relationships.aspx

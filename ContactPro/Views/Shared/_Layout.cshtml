@@ -2,6 +2,13 @@
 
 @inject SignInManager<AppUser> SignInManager
 
+@* These are to used to used to Authorize the user. 
+   The Contact and Category pages should not be visible to users if they are not logged in
+   To be able to Create Contacts and Category, the user must be authorized. 
+   Guest users should not be able to create Contacts and Category
+   See the code below. 
+*@
+
 <!DOCTYPE html>
 <html lang="en" class="h-100">
 <head>
@@ -41,6 +48,11 @@
                         <li class="nav-item">
                             <a class="nav-link active" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
+                        @* The links are NOT rendered on the serverside
+                        BUT
+                        We will have to secure this from the controller side, so that users cannot type in
+                        the links and view the pages  by using [Authorize]
+                        *@
                         @if (SignInManager.IsSignedIn(User))
                         {
                             <li class="nav-item">
@@ -51,6 +63,7 @@
                             </li>
                         }
                     </ul>
+                    @* This generates our register and login links *@
                     <partial name="_LoginPartial" />
                 </div>
             </div>
@@ -89,6 +102,7 @@
     </header>
 
     <main class="content" id="mainHero">
+        @* All the pages are centred but Home Controller's Index action uses LayoutLander View which has container-fluid *@
         <section class="container h-100">
             @RenderBody()
         </section>

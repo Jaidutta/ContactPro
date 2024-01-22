@@ -1,6 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity
 
 @inject SignInManager<AppUser> SignInManager
+
 <!DOCTYPE html>
 <html lang="en" class="h-100">
 <head>
@@ -29,7 +30,7 @@
     <header>
         <!-- NEW NAVBAR-->
         <nav class="navbar navbar-expand-md navbar-light fixed-top border-bottom border-light navShadow">
-            <div class="container-fluid">
+            <div class="container">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index"><img src="/img/ColorLogoNoBackground.png" height=45></a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
                         aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,6 +41,11 @@
                         <li class="nav-item">
                             <a class="nav-link active" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
+                        @* The links are NOT rendered on the serverside 
+                                       BUT 
+                           We will have to secure this from the controller side, so that users cannot type in 
+                           the links and view the pages  by using [Authorize]
+                        *@
                         @if (SignInManager.IsSignedIn(User))
                         {
                             <li class="nav-item">

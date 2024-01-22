@@ -25,8 +25,8 @@ namespace ContactPro.Controllers
         [Authorize]
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Categories.Include(c => c.AppUser);
-            return View(await applicationDbContext.ToListAsync());
+            var categories = _context.Categories.Include(c => c.AppUser);
+            return View(await categories.ToListAsync());
         }
 
         // GET: Categories/Details/5

@@ -61,7 +61,6 @@ namespace ContactPro.Models
         public string? ImageType { get; set; }
 
         // This is to support Image Upload
-
         [NotMapped]
         public IFormFile? ImageFile { get; set; } // used to upload the image
 

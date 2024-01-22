@@ -9,8 +9,12 @@ namespace ContactPro.Services.Interfaces
 
         Task<IEnumerable<Category>> GetUserCategoriesAsync(string userId);
 
+
+        //For a given contact return all the Category ids they are selected in
         Task<ICollection<int>> GetContactCategoryIdsAsync(int contactId);
 
+
+        //For a given contact return all the Category names they are selected in
         Task<ICollection<Category>> GetContactCategoriesAsync(int contactId);
 
         Task RemoveContactFromCategoryAsync(int categoryId, int contactId);

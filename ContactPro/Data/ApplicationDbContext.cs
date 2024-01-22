@@ -9,8 +9,13 @@ namespace ContactPro.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
-        }
 
+        }
+        
+        /* 
+         * Inside ApplicationDBContext, any Model we want to be represented must 
+         * be registered here
+         */
         public virtual DbSet<Contact> Contacts { get; set; } = default!;
         public virtual DbSet<Category> Categories { get; set; } = default!;
     }

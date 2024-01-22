@@ -17,10 +17,12 @@ namespace ContactPro.Models
         [StringLength(50, ErrorMessage = "The {0} must have at least {2} and a max  {1} characters long", MinimumLength = 2)]
         public string? LastName { get; set; }
 
-        [NotMapped]
+        [NotMapped]  // meaning there is no attribute/ column in the DB
         public string? FullName { get { return $"{FirstName} {LastName}"; } }
 
         public virtual ICollection<Contact> Contacts { get; set; } = new HashSet<Contact>();
         public virtual ICollection<Category> Categories { get; set; } = new HashSet<Category>();
     }
 }
+
+// For relationship refer to : https://www.entityframeworktutorial.net/entityframework6/entity-relationships.aspx
