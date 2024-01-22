@@ -118,9 +118,12 @@ namespace ContactPro.Controllers
         }
 
 
-
-        // GET: Contacts/Details/5
-        [Authorize]
+        public IActionResult EmailContact(int contactId)
+        {
+            return View();
+        }
+    // GET: Contacts/Details/5
+    [Authorize]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Contacts == null)
