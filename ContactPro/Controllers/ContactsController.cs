@@ -13,6 +13,7 @@ using ContactPro.Enums;
 using ContactPro.Services.Interfaces;
 using ContactPro.Services;
 using ContactPro.Models.ViewModel;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace ContactPro.Controllers
 {
@@ -22,22 +23,26 @@ namespace ContactPro.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly IImageService _imageService;
         private readonly IAddressBookService _addressBookService;
+        private readonly IEmailSender _emailService;
 
-        public ContactsController(ApplicationDbContext context, 
+        public ContactsController(ApplicationDbContext context,
                                     UserManager<AppUser> userManager,
-                                    IImageService imageService, 
-                                    IAddressBookService addressBookService)
+                                    IImageService imageService,
+                                    IAddressBookService addressBookService,
+                                    IEmailSender emailService)
         {
             _context = context;
             _userManager = userManager;
             _imageService = imageService;
             _addressBookService = addressBookService;
+            _emailService = emailService;
         }
 
         // GET: Contacts
         [Authorize]
-        public IActionResult Index(int categoryId)
-        {   
+        public IActionResult Index(int categoryId,  string swalMessage = null)
+        {
+            ViewData["SwalMessage"] = swalMessage;
             var contacts = new List<Contact>();
             string appUserId = _userManager.GetUserId(User);
 
@@ -105,7 +110,7 @@ namespace ContactPro.Controllers
              * so an Index of 0 will set the Select the 1st option "All Contacts" on the
              * front end
              */
-             
+
 
             return View(nameof(Index), contacts);
 
@@ -121,12 +126,13 @@ namespace ContactPro.Controllers
 
         public async Task<IActionResult> EmailContact(int id)
         {
+           
             string appUserId = _userManager.GetUserId(User);
 
             Contact contact = await _context.Contacts
                                           .Where(c => c.Id == id && c.AppUserId == appUserId).FirstOrDefaultAsync();
 
-            if(contact == null)
+            if (contact == null)
             {
                 return NotFound();
             }
@@ -144,12 +150,36 @@ namespace ContactPro.Controllers
                 Contact = contact,
                 EmailData = emailData
             };
-               
+
 
             return View(model);
         }
-    // GET: Contacts/Details/5
-    [Authorize]
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> EmailContact(EmailContactViewModel ecvm)
+        {
+            if(ModelState.IsValid)
+            {
+                try
+                {
+                    await _emailService.SendEmailAsync(ecvm.EmailData.EmailAddress, ecvm.EmailData.Subject, ecvm.EmailData.Body);
+                    return RedirectToAction("Index", "Contacts", new { swalMessage = "Success: Email Sent Successfully!"});
+                }
+                catch
+                {
+                    
+                    return RedirectToAction("Index", "Contacts", new { swalMessage = "Error: It failed to send the email!" });
+                    throw;
+                }
+
+            }
+            return View(ecvm);
+        }
+
+
+        // GET: Contacts/Details/5
+        [Authorize]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Contacts == null)
@@ -170,7 +200,7 @@ namespace ContactPro.Controllers
 
         // GET: Contacts/Create
         [Authorize]
-        public async Task <IActionResult> Create()
+        public async Task<IActionResult> Create()
         {
             string appUserId = _userManager.GetUserId(User);
 
@@ -203,7 +233,7 @@ namespace ContactPro.Controllers
                 contact.AppUserId = _userManager.GetUserId(User);
                 contact.Created = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
-                if(contact.BirthDate != null)
+                if (contact.BirthDate != null)
                 {
                     contact.BirthDate = DateTime.SpecifyKind(contact.BirthDate.Value, DateTimeKind.Utc);
                 }
@@ -211,24 +241,24 @@ namespace ContactPro.Controllers
                 if (contact.ImageFile != null)
                 {
                     contact.ImageData = await _imageService.ConvertFileToByteArrayAsync(contact.ImageFile);
-                    contact.ImageType = contact.ImageFile.ContentType; 
+                    contact.ImageType = contact.ImageFile.ContentType;
                     /*
                        * It looks at the header of the post method and determine the type of image
                                                                   
                     */
                 }
-        
 
-        _context.Add(contact);
+
+                _context.Add(contact);
                 await _context.SaveChangesAsync();
 
                 // loop over all the selected categories
-                foreach(int categoryId in CategoryList)
+                foreach (int categoryId in CategoryList)
                 {
                     // save each category selected to the ContactCategories table
                     await _addressBookService.AddContactToCategoryAsync(categoryId, contact.Id);
                 }
-                
+
 
                 return RedirectToAction(nameof(Index));
             }
@@ -281,7 +311,7 @@ namespace ContactPro.Controllers
             if (ModelState.IsValid)
             {
                 try
-                {   
+                {
                     /* 
                      * Since we are using postgres, anytime we are handling dates, we have got to format them correctly
                      * so they can be saved to the database
@@ -293,13 +323,13 @@ namespace ContactPro.Controllers
                         contact.BirthDate = DateTime.SpecifyKind(contact.BirthDate.Value, DateTimeKind.Utc);
                     }
 
-                    if(contact.ImageFile != null)
+                    if (contact.ImageFile != null)
                     {
                         contact.ImageData = await _imageService.ConvertFileToByteArrayAsync(contact.ImageFile);
                         contact.ImageType = contact.ImageFile.ContentType;
 
                     }
-                    
+
 
                     _context.Update(contact);
                     await _context.SaveChangesAsync();
@@ -311,16 +341,16 @@ namespace ContactPro.Controllers
                      * 2) Add the selected categories
                      *
                     */
-                    List<Category> oldCategories = (await _addressBookService.GetContactCategoriesAsync(contact.Id)).ToList();    
+                    List<Category> oldCategories = (await _addressBookService.GetContactCategoriesAsync(contact.Id)).ToList();
 
-                    foreach(var category in oldCategories)
+                    foreach (var category in oldCategories)
                     {
                         await _addressBookService.RemoveContactFromCategoryAsync(category.Id, contact.Id);
                     }
 
                     // add the selected categories
 
-                    foreach(var categoryId in CategoryList)
+                    foreach (var categoryId in CategoryList)
                     {
                         await _addressBookService.AddContactToCategoryAsync(categoryId, contact.Id);
 
@@ -378,14 +408,14 @@ namespace ContactPro.Controllers
             {
                 _context.Contacts.Remove(contact);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool ContactExists(int id)
         {
-          return (_context.Contacts?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Contacts?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }
