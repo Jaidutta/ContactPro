@@ -1,12 +1,15 @@
-﻿namespace ContactPro.Models.ViewModel
-{
-    public class EmailContactViewModel
-    {
-        public Contact? Contact { get; set; }
+﻿namespace ContactPro.Models.ViewModels
 
-        public EmailData? EmailData { get; set; }  
+{
+    public class EmailCategoryViewModel
+    {
+        public List<Contact>? Contacts { get; set; }
+        public EmailData? EmailData { get; set; }
+
     }
 }
+
+
 
 /* 
  * Inside a ViewModel, the data can come from multiple classes. We may be joining datasets

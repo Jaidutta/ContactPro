@@ -1,8 +1,5 @@
 ﻿@model ContactPro.Models.Category
 
-@{
-    ViewData["Title"] = "Create";
-}
 
 <h1>Create Category</h1>
 
@@ -12,11 +9,11 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
           
             <div class="form-group">
-                <label asp-for="Name" class="form-label"></label>
+                <label asp-for="Name" class="form-label text-primary">Enter a Category Name</label>
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
-            <div class="form-group text-end mt-4">
+            <div class="form-group text-end mt-2">
                 <input type="submit" value="Create" class="btn btn-primary rounded-pill btnlinks" />
             </div>
         </form>

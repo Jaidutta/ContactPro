@@ -9,11 +9,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace ContactPro.Data.Migrations
+namespace ContactPro.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231229161612_001_Initial")]
-    partial class _001_Initial
+    [Migration("20240124132817_002_")]
+    partial class _002_
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
