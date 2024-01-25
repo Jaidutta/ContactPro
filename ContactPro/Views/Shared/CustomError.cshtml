@@ -1,0 +1,19 @@
+﻿@model ContactPro.Models.CustomError;
+
+<div class="d-flex flex-column justify-content-center">
+    <div class="row row-cols-1">
+        <div class="col text-center fs-2 fw-bolder">@Model.code</div>
+        <div class="col text-center h5 text-primary">
+            @Model.message
+        </div>
+        <div class="col text-center mb-3">
+            <a asp-action="Index" asp-controller="Home" class="btn btn-primary btn-lg rounded-pill">
+                Go To Homepage<span class="fa fa-angle-right"></span>
+            </a>
+        </div>
+        <div class="col text-center">
+            <img src="~/img/404-Image.jpg" alt="Page not found" class="img-fluid" />
+        </div>
+        
+    </div>
+</div>

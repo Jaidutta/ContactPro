@@ -47,6 +47,12 @@ else
     app.UseHsts();
 }
 
+/* This is listener. When it sees an error, it will take to a particular controller action
+ * and re-execute it with the status code found
+ * Controller --> Home, Action --> HandleError --> code will be the next param 
+ * With these, it is going to re-execute it
+*/
+app.UseStatusCodePagesWithReExecute("/Home/HandleError/{0}");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
