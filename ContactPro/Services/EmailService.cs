@@ -18,9 +18,11 @@ namespace ContactPro.Services
         }
 
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
-        {   
+        {
+            var emailSender = _mailSettings.Email ?? Environment.GetEnvironmentVariable("Email");
+
             // this gives us the ability to log in to that email account(gmail)
-            var emailSender = _mailSettings.Email; // This is the ability to send email, the gmail account
+            //var emailSender = _mailSettings.Email; // This is the ability to send email, the gmail account
 
             // This will allow us to create email messages with MailKit and send them wit MimeKit
             MimeMessage newEmail = new();
@@ -48,9 +50,9 @@ namespace ContactPro.Services
 
             try 
             {
-                var host = _mailSettings.Host;
-                var port = _mailSettings.Port;
-                var password = _mailSettings.Password;
+                var host = _mailSettings.Host ?? Environment.GetEnvironmentVariable("Email"); 
+                var port = _mailSettings.Port != 0 ? _mailSettings.Port : int.Parse(Environment.GetEnvironmentVariable("Port")!); 
+                var password = _mailSettings.Password ?? Environment.GetEnvironmentVariable("Password"); 
 
                 // ecureSocketOptions.StartTls is going to encrypt it end-to-end -- it is the encryption level
                 await smtpClient.ConnectAsync(host, port, SecureSocketOptions.StartTls);
