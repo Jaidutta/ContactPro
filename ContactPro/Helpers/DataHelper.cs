@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace ContactPro.Helpers
 
 {
-    public class DataHelper
+    public static class DataHelper
     {
         public static async Task ManageDataAsync(IServiceProvider svcProvider)
         {
