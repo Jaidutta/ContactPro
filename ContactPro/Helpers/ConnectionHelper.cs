@@ -6,7 +6,7 @@ namespace ContactPro.Helpers
     {
         public static string GetConnectionString(IConfiguration configuration)
         {
-            var connectionString = configuration.GetSection("ConnectionStrings")["DefaultConnection"];
+            var connectionString = configuration.GetSection("pgSettings")["pgConnection"];
             var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 
             return string.IsNullOrEmpty(databaseUrl) ? connectionString : BuildConnectionString(databaseUrl);
